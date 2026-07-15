@@ -7,5 +7,6 @@
         public int UserId { get; set; }
         public string Title { get; set; }
         public Status Status { get; set; }
+        public User User { get; set; }
     }
 }
