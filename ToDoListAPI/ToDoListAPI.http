@@ -1,6 +1,13 @@
 @ToDoListAPI_HostAddress = http://localhost:5287
 
-GET {{ToDoListAPI_HostAddress}}
-Accept: application/json
+Post {{ToDoListAPI_HostAddress}}/api/User
+Content-type: application/json
+
+{
+  "Username": "testuser2",
+  "PasswordHash": "mysecretpassword2"
+}
 
 ###
+GET {{ToDoListAPI_HostAddress}}/api/User
+Accept: application/json
