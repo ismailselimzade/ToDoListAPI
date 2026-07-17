@@ -25,7 +25,7 @@ namespace ToDoListAPI.Controllers
         {
             var user = new User { UserName = userDto.UserName, PasswordHash = _passwordService.HashPassword(userDto.PasswordHash) };
 
-            _db.Users.Add(user);
+            await _db.Users.AddAsync(user);
             await _db.SaveChangesAsync();
 
             return Ok();
