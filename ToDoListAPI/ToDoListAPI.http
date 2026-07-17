@@ -1,5 +1,7 @@
 @ToDoListAPI_HostAddress = http://localhost:5287
 
+### TEST USER
+### 1. CREATE USER (POST)
 Post {{ToDoListAPI_HostAddress}}/api/User
 Content-type: application/json
 
@@ -8,6 +10,41 @@ Content-type: application/json
   "PasswordHash": "mysecretpassword2"
 }
 
-###
+### 2. GET ALL USERS (GET)
 GET {{ToDoListAPI_HostAddress}}/api/User
+Accept: application/json
+
+### TEST TODOITEM
+### 1. CREATE TODO (POST)
+Post {{ToDoListAPI_HostAddress}}/api/todo
+Content-Type: application/json
+
+{
+  "title": "My first task",
+  "userId": 1
+}
+
+### 2. GET ALL TODOS FOR USER (GET)
+GET {{ToDoListAPI_HostAddress}}/api/todo/user/1
+Accept: application/json
+
+### 3. GET TODO DETAILS (GET)
+GET {{ToDoListAPI_HostAddress}}/api/todo/1
+Accept: application/json
+
+### 4. UPDATE TODO (PUT)
+Put {{ToDoListAPI_HostAddress}}/api/todo/1
+Content-Type: application/json
+
+{
+  "title": "Updated task2",
+  "status": 0
+}
+
+### 5. DELETE TODO (DELETE)
+DELETE {{ToDoListAPI_HostAddress}}/api/todo/1
+Accept: application/json
+
+### 6. GET TODOS BY STATUS (GET)
+GET {{ToDoListAPI_HostAddress}}/api/todo/status/InProgress?userId=1
 Accept: application/json
