@@ -80,7 +80,7 @@ namespace ToDoListAPI.Controllers
 
 
             user.UserName = updateUserDto.UserName;
-            if (user.PasswordHash == _passwordService.HashPassword(updateUserDto.OldPassword))
+            if (_passwordService.VerifyPassword(updateUserDto.OldPassword, user.PasswordHash))
             {
                 user.PasswordHash = _passwordService.HashPassword(updateUserDto.NewPassword);
                 _db.Users.Update(user);
@@ -101,7 +101,7 @@ namespace ToDoListAPI.Controllers
             var user = await _db.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
-            if (user.PasswordHash == _passwordService.HashPassword(password))
+            if (_passwordService.VerifyPassword(password, user.PasswordHash))
             {
                 _db.Users.Remove(user);
                 await _db.SaveChangesAsync();

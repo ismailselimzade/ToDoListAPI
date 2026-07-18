@@ -1,10 +1,17 @@
-﻿namespace ToDoListAPI.Services
+﻿using BCrypt.Net;
+
+namespace ToDoListAPI.Services
 {
     public class PasswordService : IPasswordService
     {
         public string HashPassword(string password)
         {
-            return password + "hashed";
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
+
+        public bool VerifyPassword(string password, string hash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, hash);
         }
     }
 }
