@@ -6,12 +6,32 @@ Post {{ToDoListAPI_HostAddress}}/api/User
 Content-type: application/json
 
 {
-  "Username": "testuser2",
-  "PasswordHash": "mysecretpassword2"
+  "Username": "TESTUSER 1",
+  "Password": "test password"
 }
 
 ### 2. GET ALL USERS (GET)
 GET {{ToDoListAPI_HostAddress}}/api/User
+Accept: application/json
+
+
+### 3. GET USER DETAILS (GET)
+
+GET {{ToDoListAPI_HostAddress}}/api/user/5
+Accept: application/json
+
+### 4. UPDATE USER (PUT)
+PUT {{ToDoListAPI_HostAddress}}/api/user/6
+Content-Type: application/json
+
+{
+  "UserName": "update TEST USER",
+  "OldPassword": "test password",
+  "NewPassword": "testpassword"
+}
+
+### 5. DELETE USER (DELETE)
+DELETE {{ToDoListAPI_HostAddress}}/api/user/6?password=testpassword
 Accept: application/json
 
 ### TEST TODOITEM
@@ -20,8 +40,8 @@ Post {{ToDoListAPI_HostAddress}}/api/todo
 Content-Type: application/json
 
 {
-  "title": "My first task",
-  "userId": 1
+  "title": "My first test task",
+  "userId": 6
 }
 
 ### 2. GET ALL TODOS FOR USER (GET)
@@ -29,7 +49,7 @@ GET {{ToDoListAPI_HostAddress}}/api/todo/user/1
 Accept: application/json
 
 ### 3. GET TODO DETAILS (GET)
-GET {{ToDoListAPI_HostAddress}}/api/todo/1
+GET {{ToDoListAPI_HostAddress}}/api/todo/4
 Accept: application/json
 
 ### 4. UPDATE TODO (PUT)
