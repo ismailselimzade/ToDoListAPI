@@ -23,16 +23,22 @@ namespace ToDoListAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserDto userDto)
         {
-            var user = new User { UserName = userDto.UserName, PasswordHash = _passwordService.HashPassword(userDto.PasswordHash) };
+            if (string.IsNullOrWhiteSpace(userDto.UserName))
+                return BadRequest("Username required");
+
+            if (string.IsNullOrWhiteSpace(userDto.Password))
+                return BadRequest("Password required");
+
+            var user = new User { UserName = userDto.UserName, PasswordHash = _passwordService.HashPassword(userDto.Password) };
 
             await _db.Users.AddAsync(user);
             await _db.SaveChangesAsync();
 
-            return Ok();
+            return Ok(user);
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<GetUsersDto>>> GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
             var users = await _db.Users
                 .Select(u => new GetUsersDto
@@ -43,6 +49,66 @@ namespace ToDoListAPI.Controllers
                 .ToListAsync();
 
             return Ok(users);
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserById(int userId)
+        {
+            var user = await _db.Users
+                .Where(u => u.Id == userId)
+                .Select(u => new GetUsersDto { UserName = u.UserName, Id = u.Id })
+                .FirstOrDefaultAsync();
+
+            return user == null ? NotFound(): Ok(user);
+
+        }
+
+        [HttpPut("{userId}")]
+        public async Task<IActionResult> UpdateUser(int userId, UpdateUserDto updateUserDto)
+        {
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            if (string.IsNullOrWhiteSpace(updateUserDto.UserName))
+                return BadRequest("Username required");
+
+            if (string.IsNullOrWhiteSpace(updateUserDto.OldPassword))
+                return BadRequest("Old password required");
+
+            if (string.IsNullOrWhiteSpace(updateUserDto.NewPassword))
+                return BadRequest("New password required");
+
+
+            user.UserName = updateUserDto.UserName;
+            if (user.PasswordHash == _passwordService.HashPassword(updateUserDto.OldPassword))
+            {
+                user.PasswordHash = _passwordService.HashPassword(updateUserDto.NewPassword);
+                _db.Users.Update(user);
+                await _db.SaveChangesAsync();
+
+                return Ok(user);
+            }
+            else
+            {
+                return BadRequest("Password is not correct");
+            }
+            
+        }
+
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUser(int userId, [FromQuery] string password)
+        {
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            if (user.PasswordHash == _passwordService.HashPassword(password))
+            {
+                _db.Users.Remove(user);
+                await _db.SaveChangesAsync();
+                return Ok();
+            }
+            else
+                return BadRequest("Password is not correct");
         }
     }
 }
