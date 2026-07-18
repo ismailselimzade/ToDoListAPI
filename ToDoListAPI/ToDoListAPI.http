@@ -1,70 +1,87 @@
 @ToDoListAPI_HostAddress = http://localhost:5287
 
-### TEST USER
-### 1. CREATE USER (POST)
-Post {{ToDoListAPI_HostAddress}}/api/User
-Content-type: application/json
+############################
+### AUTH
+############################
+
+### 1. LOGIN (POST)
+POST {{ToDoListAPI_HostAddress}}/api/auth/login
+Content-Type: application/json
 
 {
-  "Username": "TESTUSER 1",
-  "Password": "test password"
+  "UserName": "",
+  "Password": ""
+}
+
+############################
+### USER
+############################
+
+### 1. CREATE USER (POST)
+POST {{ToDoListAPI_HostAddress}}/api/user
+Content-Type: application/json
+
+{
+  "UserName": "",
+  "Password": ""
 }
 
 ### 2. GET ALL USERS (GET)
-GET {{ToDoListAPI_HostAddress}}/api/User
+GET {{ToDoListAPI_HostAddress}}/api/user
 Accept: application/json
 
-
 ### 3. GET USER DETAILS (GET)
-
-GET {{ToDoListAPI_HostAddress}}/api/user/5
+GET {{ToDoListAPI_HostAddress}}/api/user/0
 Accept: application/json
 
 ### 4. UPDATE USER (PUT)
-PUT {{ToDoListAPI_HostAddress}}/api/user/6
+PUT {{ToDoListAPI_HostAddress}}/api/user/0
 Content-Type: application/json
 
 {
-  "UserName": "update TEST USER",
-  "OldPassword": "test password",
-  "NewPassword": "testpassword"
+  "UserName": "",
+  "OldPassword": "",
+  "NewPassword": ""
 }
 
 ### 5. DELETE USER (DELETE)
-DELETE {{ToDoListAPI_HostAddress}}/api/user/6?password=testpassword
+DELETE {{ToDoListAPI_HostAddress}}/api/user/0?password=
 Accept: application/json
 
-### TEST TODOITEM
+############################
+### TODO
+############################
+
 ### 1. CREATE TODO (POST)
-Post {{ToDoListAPI_HostAddress}}/api/todo
+POST {{ToDoListAPI_HostAddress}}/api/todo
 Content-Type: application/json
 
 {
-  "title": "My first test task",
-  "userId": 6
+  "title": "",
+  "userId": 0
 }
 
 ### 2. GET ALL TODOS FOR USER (GET)
-GET {{ToDoListAPI_HostAddress}}/api/todo/user/1
+GET {{ToDoListAPI_HostAddress}}/api/todo/user/0
 Accept: application/json
 
 ### 3. GET TODO DETAILS (GET)
-GET {{ToDoListAPI_HostAddress}}/api/todo/4
+GET {{ToDoListAPI_HostAddress}}/api/todo/0
 Accept: application/json
 
 ### 4. UPDATE TODO (PUT)
-Put {{ToDoListAPI_HostAddress}}/api/todo/1
+PUT {{ToDoListAPI_HostAddress}}/api/todo/0
 Content-Type: application/json
 
 {
-  "title": "Updated task2",
+  "title": "",
   "status": 0
 }
 
 ### 5. DELETE TODO (DELETE)
-DELETE {{ToDoListAPI_HostAddress}}/api/todo/1
+DELETE {{ToDoListAPI_HostAddress}}/api/todo/0
 Accept: application/json
 
 ### 6. GET TODOS BY STATUS (GET)
-GET {{ToDoListAPI_HostAddress}}/api/todo/status/InProgress?userId=1
+GET {{ToDoListAPI_HostAddress}}/api/todo/status/InProgress?userId=0
 Accept: application/json
