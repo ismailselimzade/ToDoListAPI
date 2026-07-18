@@ -34,7 +34,7 @@ namespace ToDoListAPI.Controllers
             await _db.Users.AddAsync(user);
             await _db.SaveChangesAsync();
 
-            return Ok(user);
+            return Ok(new GetUsersDto { Id = user.Id, UserName = user.UserName });
         }
 
         [HttpGet]
@@ -86,7 +86,7 @@ namespace ToDoListAPI.Controllers
                 _db.Users.Update(user);
                 await _db.SaveChangesAsync();
 
-                return Ok(user);
+                return Ok(new GetUsersDto { Id = user.Id, UserName = user.UserName });
             }
             else
             {
