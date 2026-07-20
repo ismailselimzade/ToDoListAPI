@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using ToDoListAPI.Data;
@@ -38,33 +38,20 @@ namespace ToDoListAPI.Controllers
             await _db.Users.AddAsync(user);
             await _db.SaveChangesAsync();
 
-            return Ok(new GetUsersDto { Id = user.Id, UserName = user.UserName });
+            return Ok(new GetUserDto { Id = user.Id, UserName = user.UserName });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUser()
         {
-            var users = await _db.Users
-                .Select(u => new GetUsersDto
-                {
-                    Id = u.Id,
-                    UserName = u.UserName
-                })
-                .ToListAsync();
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            return Ok(users);
-        }
-
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUserById(int userId)
-        {
             var user = await _db.Users
                 .Where(u => u.Id == userId)
-                .Select(u => new GetUsersDto { UserName = u.UserName, Id = u.Id })
+                .Select(u => new GetUserDto { UserName = u.UserName, Id = u.Id })
                 .FirstOrDefaultAsync();
 
             return user == null ? NotFound(): Ok(user);
-
         }
 
         [HttpPut]
@@ -75,17 +62,14 @@ namespace ToDoListAPI.Controllers
             var user = await _db.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
-            if (string.IsNullOrWhiteSpace(updateUserDto.UserName))
-                return BadRequest("Username required");
-
             if (string.IsNullOrWhiteSpace(updateUserDto.OldPassword))
                 return BadRequest("Old password required");
 
             if (string.IsNullOrWhiteSpace(updateUserDto.NewPassword))
                 return BadRequest("New password required");
 
+            
 
-            user.UserName = updateUserDto.UserName;
             if (_passwordService.VerifyPassword(updateUserDto.OldPassword, user.PasswordHash))
             {
                 user.UserName = updateUserDto.UserName;
@@ -93,7 +77,7 @@ namespace ToDoListAPI.Controllers
                 _db.Users.Update(user);
                 await _db.SaveChangesAsync();
 
-                return Ok(new GetUsersDto { Id = user.Id, UserName = user.UserName });
+                return Ok(new GetUserDto { Id = user.Id, UserName = user.UserName });
             }
             else
             {
@@ -108,6 +92,7 @@ namespace ToDoListAPI.Controllers
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             var user = await _db.Users.FindAsync(userId);
+
             if (user == null) return NotFound();
 
             if (_passwordService.VerifyPassword(deleteUserDto.Password, user.PasswordHash))
