@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using ToDoListAPI.Data;
@@ -29,12 +29,12 @@ namespace ToDoListAPI.Controllers
             await _db.TodoItems.AddAsync(todo);
             await _db.SaveChangesAsync();
 
-            return Ok(todo);
+            return Ok(new GetTodoDto { Id = todo.Id, UserId = userId, Title = todo.Title, Status = todo.Status});
         }
 
         [HttpGet("user")]
         public async Task<IActionResult> GetUserTodos() 
-        { 
+        {
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             var todos = await _db.TodoItems
@@ -71,9 +71,11 @@ namespace ToDoListAPI.Controllers
             var todo = await _db.TodoItems
                 .FindAsync(todoId);
 
-            if (todo == null) return NotFound();
-            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            if (todo == null) 
+                return NotFound();
 
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
             if (todo.UserId != userId)
                 return NotFound();
                 
@@ -83,14 +85,18 @@ namespace ToDoListAPI.Controllers
             _db.TodoItems.Update(todo);
             await _db.SaveChangesAsync();
 
-            return Ok(todo);
+            return Ok(new GetTodoDto { Id = todo.Id, UserId = userId, Title = todo.Title, Status = todo.Status});
+
         }
 
         [HttpDelete("{todoId}")]
         public async Task<IActionResult> DeleteTodo(int todoId) 
         { 
             var todo = await _db.TodoItems.FindAsync(todoId);
-            if (todo == null ) return NotFound();
+
+            if (todo == null)
+                return NotFound();
+            
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             if (todo.UserId != userId)
