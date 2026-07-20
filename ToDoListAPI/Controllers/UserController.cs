@@ -1,5 +1,7 @@
+﻿using Microsoft.AspNetCore.Authorization;
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using ToDoListAPI.Data;
 using ToDoListAPI.DTOs;
 using ToDoListAPI.Models;
@@ -9,6 +11,7 @@ namespace ToDoListAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -21,6 +24,7 @@ namespace ToDoListAPI.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateUser(CreateUserDto userDto)
         {
             if (string.IsNullOrWhiteSpace(userDto.UserName))
@@ -38,7 +42,7 @@ namespace ToDoListAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUser()
         {
             var users = await _db.Users
                 .Select(u => new GetUsersDto
@@ -63,9 +67,11 @@ namespace ToDoListAPI.Controllers
 
         }
 
-        [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(int userId, UpdateUserDto updateUserDto)
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
             var user = await _db.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
@@ -82,6 +88,7 @@ namespace ToDoListAPI.Controllers
             user.UserName = updateUserDto.UserName;
             if (_passwordService.VerifyPassword(updateUserDto.OldPassword, user.PasswordHash))
             {
+                user.UserName = updateUserDto.UserName;
                 user.PasswordHash = _passwordService.HashPassword(updateUserDto.NewPassword);
                 _db.Users.Update(user);
                 await _db.SaveChangesAsync();
@@ -95,13 +102,15 @@ namespace ToDoListAPI.Controllers
             
         }
 
-        [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteUser(int userId, [FromQuery] string password)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser(DeleteUserDto deleteUserDto)
         {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
             var user = await _db.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
-            if (_passwordService.VerifyPassword(password, user.PasswordHash))
+            if (_passwordService.VerifyPassword(deleteUserDto.Password, user.PasswordHash))
             {
                 _db.Users.Remove(user);
                 await _db.SaveChangesAsync();

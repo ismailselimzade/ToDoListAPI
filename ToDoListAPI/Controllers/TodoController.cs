@@ -1,5 +1,7 @@
+﻿using Microsoft.AspNetCore.Authorization;
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using ToDoListAPI.Data;
 using ToDoListAPI.DTOs;
 using ToDoListAPI.Models;
@@ -8,6 +10,7 @@ namespace ToDoListAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TodoController : ControllerBase
     {
         private readonly AppDbContext _db;
@@ -20,7 +23,8 @@ namespace ToDoListAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTodo(CreateTodoDto createTodoDto) 
         {
-            var todo = new TodoItem { Title = createTodoDto.Title, UserId = createTodoDto.UserId, Status = Status.Pending };
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var todo = new TodoItem { Title = createTodoDto.Title, UserId = userId, Status = Status.Pending };
 
             await _db.TodoItems.AddAsync(todo);
             await _db.SaveChangesAsync();
@@ -28,9 +32,11 @@ namespace ToDoListAPI.Controllers
             return Ok(todo);
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetUserTodos(int userId) 
+        [HttpGet("user")]
+        public async Task<IActionResult> GetUserTodos() 
         { 
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
             var todos = await _db.TodoItems
                 .Where(t => t.UserId == userId)
                 .Select(t => new GetTodoDto { Id = t.Id, UserId = t.UserId, Title = t.Title, Status = t.Status })
@@ -57,6 +63,7 @@ namespace ToDoListAPI.Controllers
                 .FindAsync(todoId);
 
             if (todo == null) return NotFound();
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             todo.Title = updateTodoDto.Title;
             todo.Status = updateTodoDto.Status;
@@ -72,6 +79,7 @@ namespace ToDoListAPI.Controllers
         { 
             var todo = await _db.TodoItems.FindAsync(todoId);
             if (todo == null ) return NotFound();
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             _db.TodoItems.Remove(todo);
             await _db.SaveChangesAsync();
@@ -80,8 +88,10 @@ namespace ToDoListAPI.Controllers
         }
 
         [HttpGet("status/{status}")]
-        public async Task<IActionResult> GetTodosByStatus(Status status, [FromQuery] int userId) 
+        public async Task<IActionResult> GetTodosByStatus(Status status) 
         {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
             var todos = await _db.TodoItems
                 .Where(t => t.Status == status && t.UserId == userId)
                 .Select(t => new GetTodoDto { Id = t.Id, UserId = t.UserId, Title = t.Title, Status = t.Status})
