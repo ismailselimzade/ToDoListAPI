@@ -53,7 +53,16 @@ namespace ToDoListAPI.Controllers
                 .Select(t => new GetTodoDto { Id = t.Id, UserId = t.UserId, Title = t.Title, Status = t.Status})
                 .FirstOrDefaultAsync();
 
-            return todo == null ? NotFound() : Ok(todo);
+            if (todo == null)
+                return NotFound();
+                
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            if (todo.UserId == userId)
+                return Ok(todo);
+            else
+                return NotFound();
+            
         }
 
         [HttpPut("{todoId}")]
@@ -65,6 +74,9 @@ namespace ToDoListAPI.Controllers
             if (todo == null) return NotFound();
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
+            if (todo.UserId != userId)
+                return NotFound();
+                
             todo.Title = updateTodoDto.Title;
             todo.Status = updateTodoDto.Status;
 
@@ -80,6 +92,9 @@ namespace ToDoListAPI.Controllers
             var todo = await _db.TodoItems.FindAsync(todoId);
             if (todo == null ) return NotFound();
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            if (todo.UserId != userId)
+                 return NotFound();
 
             _db.TodoItems.Remove(todo);
             await _db.SaveChangesAsync();
